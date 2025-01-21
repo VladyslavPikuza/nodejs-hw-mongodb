@@ -3,6 +3,8 @@ const cors = require('cors');
 const pino = require('pino');
 const pinoHttp = require('pino-http');
 
+
+
 const setupServer = () => {
   const app = express();
   const logger = pino();
@@ -18,6 +20,9 @@ const setupServer = () => {
   app.listen(PORT, () => {
     logger.info(`Server is running on port ${PORT}`);
   });
+
 };
+
+
 
 module.exports = { setupServer };
