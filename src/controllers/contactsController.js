@@ -1,45 +1,29 @@
-const { getAllContacts, getContactByIdFromService } = require('../services/contacts');
+const createError = require('http-errors');
+const { createContactInService } = require('../services/contacts');
 
-const getContacts = async (req, res) => {
+const createContact = async (req, res, next) => {
   try {
-    const contacts = await getAllContacts();
-    res.status(200).json({
-      status: 200,
-      message: "Successfully found contacts!",
-      data: contacts,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: 'Error fetching contacts',
-    });
-  }
-};
+    const { name, phoneNumber, email, isFavourite, contactType } = req.body;
 
-const getContactById = async (req, res) => {
-  try {
-    const contactId = req.params.contactId;
-    const contact = await getContactByIdFromService(contactId);
 
-    if (contact) {
-      res.status(200).json({
-        status: 200,
-        message: `Successfully found contact with id ${contactId}!`,
-        data: contact,
-      });
-    } else {
-      res.status(404).json({
-        message: 'Contact not found',
-      });
+    console.log('Received data:', req.body);
+
+    if (!name || !phoneNumber || !contactType) {
+      throw createError(400, 'Missing required fields: name, phoneNumber, or contactType');
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: 'Error fetching contact',
+
+    const newContact = await createContactInService({ name, phoneNumber, email, isFavourite, contactType });
+
+    res.status(201).json({
+      status: 201,
+      message: 'Successfully created a contact!',
+      data: newContact,
     });
+  } catch (error) {
+    console.error('Error creating contact:', error);
+    next(error);
   }
 };
 
-module.exports = { getContacts, getContactById };
 
-
+module.exports = { createContact };
