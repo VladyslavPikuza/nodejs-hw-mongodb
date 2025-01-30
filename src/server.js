@@ -4,6 +4,7 @@ const pino = require('pino');
 const pinoHttp = require('pino-http');
 const contactsRouter = require('./routers/contacts');
 const { errorHandler } = require('./middlewares/errorHandler');
+const notFoundHandler = require('./middlewares/notFoundHandler');
 
 const setupServer = () => {
   const app = express();
@@ -13,16 +14,13 @@ const setupServer = () => {
   app.use(pinoHttp({ logger }));
   app.use(express.json());
 
-
   app.use('/contacts', contactsRouter);
 
 
-  app.use(errorHandler);
+  app.use(notFoundHandler);
 
   
-  app.use((req, res) => {
-    res.status(404).json({ message: 'Route not found' });
-  });
+  app.use(errorHandler);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
