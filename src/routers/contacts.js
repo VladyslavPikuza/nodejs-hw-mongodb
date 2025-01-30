@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const ctrlWrapper = require('../middlewares/ctrlWrapper');
+const ctrlWrapper = require('../utils/ctrlWrapper');
 const {
   getContacts,
   getContactById,
   updateContact,
   deleteContact,
-  createContact 
+  createContact
 } = require('../controllers/contacts');
 
 router.get('/', ctrlWrapper(getContacts));
