@@ -2,12 +2,33 @@ const { getAllContacts, getContactByIdFromService, updateContactInService, delet
 const createError = require('http-errors');
 
 const getContacts = async (req, res, next) => {
-  const contacts = await getAllContacts();
-  res.status(200).json({
-    status: 200,
-    message: "Successfully found contacts!",
-    data: contacts,
-  });
+  try {
+    console.log("Received request for contacts");
+    const page = parseInt(req.query.page) || 1;
+    const perPage = parseInt(req.query.perPage) || 10;
+    const skip = (page - 1) * perPage;
+
+    const totalItems = await getAllContacts();
+    const totalPages = Math.ceil(totalItems.length / perPage);
+    const contacts = await getAllContacts().skip(skip).limit(perPage);
+
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully found contacts!',
+      data: {
+        data: contacts,
+        page,
+        perPage,
+        totalItems: totalItems.length,
+        totalPages,
+        hasPreviousPage: page > 1,
+        hasNextPage: page < totalPages
+      }
+    });
+  } catch (error) {
+    console.error("Error in getContacts:", error);
+    next(error);
+  }
 };
 
 const getContactById = async (req, res, next) => {
