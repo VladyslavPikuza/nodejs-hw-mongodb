@@ -1,11 +1,20 @@
 const { Contact } = require('../models/contacts');
 
-const getAllContacts = async () => {
+const getAllContacts = async (filter, page, perPage, sortBy, sortOrder) => {
   try {
-    const contacts = await Contact.find();
-    return contacts;
+    const skip = (page - 1) * perPage;
+
+
+    const contacts = await Contact.find(filter)
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(perPage);
+
+
+    const totalItems = await Contact.countDocuments(filter); 
+    return { contacts, totalItems };
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching contacts:', error);
     throw new Error('Error fetching contacts: ' + error.message);
   }
 };

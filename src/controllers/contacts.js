@@ -4,13 +4,35 @@ const createError = require('http-errors');
 const getContacts = async (req, res, next) => {
   try {
     console.log("Received request for contacts");
+
+
     const page = parseInt(req.query.page) || 1;
     const perPage = parseInt(req.query.perPage) || 10;
-    const skip = (page - 1) * perPage;
 
-    const totalItems = await getAllContacts();
-    const totalPages = Math.ceil(totalItems.length / perPage);
-    const contacts = await getAllContacts().skip(skip).limit(perPage);
+
+    const sortBy = req.query.sortBy || 'name';
+    const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
+
+    const contactType = req.query.type;
+    const email = req.query.email;
+    const isFavourite = req.query.isFavourite ? JSON.parse(req.query.isFavourite) : undefined;
+
+
+    let filter = {};
+    if (contactType) {
+      filter.contactType = contactType;
+    }
+    if (isFavourite !== undefined) {
+      filter.isFavourite = isFavourite;
+    }
+    if (email) {
+      filter.email = email;
+    }
+
+
+    const { contacts, totalItems } = await getAllContacts(filter, page, perPage, sortBy, sortOrder);
+
+    const totalPages = Math.ceil(totalItems / perPage);
 
     res.status(200).json({
       status: 200,
@@ -19,10 +41,10 @@ const getContacts = async (req, res, next) => {
         data: contacts,
         page,
         perPage,
-        totalItems: totalItems.length,
+        totalItems,
         totalPages,
         hasPreviousPage: page > 1,
-        hasNextPage: page < totalPages
+        hasNextPage: page < totalPages,
       }
     });
   } catch (error) {
@@ -30,6 +52,7 @@ const getContacts = async (req, res, next) => {
     next(error);
   }
 };
+
 
 const getContactById = async (req, res, next) => {
   const contactId = req.params.contactId;
