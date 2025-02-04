@@ -5,7 +5,7 @@ const contactValidationSchema = Joi.object({
   phoneNumber: Joi.string().required(),
   email: Joi.string().email().required(),
   isFavourite: Joi.boolean(),
-  contactType: Joi.string().valid('friend', 'family', 'work').required(),
+  contactType: Joi.string().valid('home', 'work','personal').required(),
 });
 
 const updateContactValidationSchema = Joi.object({
@@ -13,7 +13,7 @@ const updateContactValidationSchema = Joi.object({
   phoneNumber: Joi.string(),
   email: Joi.string().email(),
   isFavourite: Joi.boolean(),
-  contactType: Joi.string().valid('friend', 'family', 'work'),
+  contactType: Joi.string().valid('home', 'work','personal'),
 });
 
 module.exports = { contactValidationSchema, updateContactValidationSchema };
