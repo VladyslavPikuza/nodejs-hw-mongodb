@@ -1,19 +1,19 @@
-const Joi = require("joi");
+const Joi = require('joi');
 
-const contactSchema = Joi.object({
-  name: Joi.string().min(3).max(20).required(),
-  phoneNumber: Joi.string().min(3).max(20).required(),
-  email: Joi.string().email().min(3).max(20).optional(),
-  isFavourite: Joi.boolean().optional(),
-  contactType: Joi.string().valid("friend", "family", "work").required(),
+const contactValidationSchema = Joi.object({
+  name: Joi.string().min(3).required(),
+  phoneNumber: Joi.string().required(),
+  email: Joi.string().email().required(),
+  isFavourite: Joi.boolean(),
+  contactType: Joi.string().valid('friend', 'family', 'work').required(),
 });
 
-const updateContactSchema = Joi.object({
-  name: Joi.string().min(3).max(20).optional(),
-  phoneNumber: Joi.string().min(3).max(20).optional(),
-  email: Joi.string().email().min(3).max(20).optional(),
-  isFavourite: Joi.boolean().optional(),
-  contactType: Joi.string().valid("friend", "family", "work").optional(),
-}).min(1); 
+const updateContactValidationSchema = Joi.object({
+  name: Joi.string().min(3),
+  phoneNumber: Joi.string(),
+  email: Joi.string().email(),
+  isFavourite: Joi.boolean(),
+  contactType: Joi.string().valid('friend', 'family', 'work'),
+});
 
-module.exports = { contactSchema, updateContactSchema };
+module.exports = { contactValidationSchema, updateContactValidationSchema };

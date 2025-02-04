@@ -1,12 +1,10 @@
-const { validate } = require("joi");
-
 const validateBody = (schema) => {
   return (req, res, next) => {
     if (!req.body) {
       return res.status(400).json({ message: 'Request body is missing' });
     }
 
-    const { error } = validate(req.body, schema, { abortEarly: false });
+    const { error } = schema.validate(req.body, { abortEarly: false });
 
     if (error) {
       console.error('Validation error:', error.details);
@@ -22,3 +20,6 @@ const validateBody = (schema) => {
 };
 
 module.exports = validateBody;
+
+
+

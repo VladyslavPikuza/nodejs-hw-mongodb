@@ -11,7 +11,7 @@ const getAllContacts = async (filter, page, perPage, sortBy, sortOrder) => {
       .limit(perPage);
 
 
-    const totalItems = await Contact.countDocuments(filter); 
+    const totalItems = await Contact.countDocuments(filter);
     return { contacts, totalItems };
   } catch (error) {
     console.error('Error fetching contacts:', error);
@@ -29,21 +29,14 @@ const getContactByIdFromService = async (contactId) => {
   }
 };
 
-const createContactInService = async ({ name, phoneNumber, email, isFavourite, contactType }) => {
+const createContactInService = async (contactData) => {
   try {
-    const newContact = new Contact({
-      name,
-      phoneNumber,
-      email,
-      isFavourite,
-      contactType,
-    });
-
+    const newContact = new Contact(contactData);
     await newContact.save();
     return newContact;
   } catch (error) {
-    console.error(error);
-    throw new Error('Error creating contact: ' + error.message);
+    console.error("Error saving contact:", error);
+    throw error;
   }
 };
 
