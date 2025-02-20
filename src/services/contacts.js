@@ -40,11 +40,11 @@ const getContactByIdFromService = async (contactId, userId) => {
 };
 
 
-const createContactInService = async (contactData, userId) => {
+const createContactInService = async (contactData) => {
   try {
-    console.log("Creating contact for user:", userId);
+    console.log("Creating contact for user:", contactData.userId);
 
-    const newContact = new Contact({ ...contactData, userId });
+    const newContact = new Contact(contactData);
     await newContact.save();
 
     return newContact;

@@ -1,18 +1,22 @@
 const { getContactsData } = require('../utils/getContactsUtils');
-const { getContactByIdFromService, updateContactInService, deleteContactFromService, createContactInService } = require('../services/contacts');
+const {
+  getContactByIdFromService,
+  updateContactInService,
+  deleteContactFromService,
+  createContactInService,
+} = require('../services/contacts');
 const createError = require('http-errors');
 const { contactValidationSchema, updateContactValidationSchema } = require('../models/contactSchema');
 
-
 const getContacts = async (req, res, next) => {
   try {
-    console.log("User ID from token in getContacts:", req.user?.id);
+    console.log('User ID from token in getContacts:', req.user?._id);
 
-    if (!req.user?.id) {
+    if (!req.user?._id) {
       return next(createError(401, 'Unauthorized: No user ID found'));
     }
 
-    const data = await getContactsData({ userId: req.user.id, ...req.query });
+    const data = await getContactsData({ userId: req.user._id, ...req.query });
 
     res.status(200).json({
       status: 200,
@@ -20,7 +24,7 @@ const getContacts = async (req, res, next) => {
       data,
     });
   } catch (error) {
-    console.error("Error in getContacts:", error);
+    console.error('Error in getContacts:', error);
     next(error);
   }
 };
@@ -28,7 +32,7 @@ const getContacts = async (req, res, next) => {
 const getContactById = async (req, res, next) => {
   try {
     const contactId = req.params.contactId;
-    const contact = await getContactByIdFromService(contactId, req.user.id);
+    const contact = await getContactByIdFromService(contactId, req.user._id);
     if (!contact) return next(createError(404, 'Contact not found'));
 
     res.status(200).json({
@@ -37,7 +41,7 @@ const getContactById = async (req, res, next) => {
       data: contact,
     });
   } catch (error) {
-    console.error("Error in getContactById:", error);
+    console.error('Error in getContactById:', error);
     next(error);
   }
 };
@@ -52,7 +56,14 @@ const updateContact = async (req, res, next) => {
       return next(createError(400, error.details[0].message));
     }
 
-    const updatedContact = await updateContactInService(contactId, { name, phoneNumber, email, isFavourite, contactType, userId: req.user.id });
+    const updatedContact = await updateContactInService(contactId, {
+      name,
+      phoneNumber,
+      email,
+      isFavourite,
+      contactType,
+      userId: req.user._id,
+    });
 
     if (!updatedContact) return next(createError(404, 'Contact not found'));
 
@@ -62,29 +73,29 @@ const updateContact = async (req, res, next) => {
       data: updatedContact,
     });
   } catch (error) {
-    console.error("Error in updateContact:", error);
+    console.error('Error in updateContact:', error);
     next(error);
   }
 };
 
 const createContact = async (req, res, next) => {
   try {
-    console.log("Request body for createContact:", req.body);
+    console.log('Request body for createContact:', req.body);
 
     const { error } = contactValidationSchema.validate(req.body);
     if (error) {
-      console.error("Validation error:", error.details);
+      console.error('Validation error:', error.details);
       return next(createError(400, error.details[0].message));
     }
 
-    const newContact = await createContactInService({ ...req.body, userId: req.user.id });
+    const newContact = await createContactInService({ ...req.body, userId: req.user._id });
     res.status(201).json({
       status: 201,
       message: 'Successfully created a contact!',
       data: newContact,
     });
   } catch (error) {
-    console.error("Error in createContact:", error);
+    console.error('Error in createContact:', error);
     next(error);
   }
 };
@@ -92,13 +103,13 @@ const createContact = async (req, res, next) => {
 const deleteContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
-    const deletedContact = await deleteContactFromService(contactId, req.user.id);
+    const deletedContact = await deleteContactFromService(contactId, req.user._id);
 
     if (!deletedContact) return next(createError(404, 'Contact not found'));
 
     res.status(204).send();
   } catch (error) {
-    console.error("Error in deleteContact:", error);
+    console.error('Error in deleteContact:', error);
     next(error);
   }
 };

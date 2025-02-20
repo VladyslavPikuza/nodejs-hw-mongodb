@@ -124,9 +124,9 @@ const logoutUser = async (req, res, next) => {
     }
 
 
-    await Session.deleteOne({ refreshToken });
+    await Session.deleteMany({ refreshToken });
 
-
+    
     res.clearCookie("refreshToken");
 
     res.status(204).send();
