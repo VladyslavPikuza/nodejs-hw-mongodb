@@ -56,14 +56,17 @@ const updateContact = async (req, res, next) => {
       return next(createError(400, error.details[0].message));
     }
 
-    const updatedContact = await updateContactInService(contactId, {
-      name,
-      phoneNumber,
-      email,
-      isFavourite,
-      contactType,
-      userId: req.user._id,
-    });
+    const updatedContact = await updateContactInService(
+  contactId,
+  {
+    name,
+    phoneNumber,
+    email,
+    isFavourite,
+    contactType,
+  },
+  req.user.id
+);
 
     if (!updatedContact) return next(createError(404, 'Contact not found'));
 

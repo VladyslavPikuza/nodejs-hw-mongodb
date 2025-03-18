@@ -69,8 +69,8 @@ const updateContactInService = async (contactId, updateData, userId) => {
 
     return updatedContact;
   } catch (error) {
-    console.error('Error updating contact:', error);
-    throw new Error('Error updating contact: ' + error.message);
+    console.error("Error updating contact:", error);
+    throw new Error("Error updating contact: " + error.message);
   }
 };
 

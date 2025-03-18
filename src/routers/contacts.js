@@ -14,13 +14,13 @@ const {
   createContact
 } = require('../controllers/contacts');
 
+router.use(authenticate);
 
-router.get('/', authenticate, ctrlWrapper(getContacts));
-router.get('/:contactId', authenticate, isValidId, ctrlWrapper(getContactById));
-router.post('/', authenticate, validateBody(contactValidationSchema), createContact);
-router.patch('/:contactId', authenticate, isValidId, validateBody(updateContactValidationSchema), ctrlWrapper(updateContact));
-router.delete('/:contactId', authenticate, isValidId, ctrlWrapper(deleteContact));
-
+router.get('/', ctrlWrapper(getContacts));
+router.get('/:contactId', isValidId, ctrlWrapper(getContactById));
+router.post('/', validateBody(contactValidationSchema), ctrlWrapper(createContact)); 
+router.patch('/:contactId', isValidId, validateBody(updateContactValidationSchema), ctrlWrapper(updateContact));
+router.delete('/:contactId', isValidId, ctrlWrapper(deleteContact));
 
 module.exports = router;
 
