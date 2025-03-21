@@ -11,7 +11,7 @@ const contactValidationSchema = Joi.object({
 const updateContactValidationSchema = Joi.object({
   name: Joi.string().min(3),
   phoneNumber: Joi.string(),
-  email: Joi.string().email(),
+  email: Joi.string().email().optional(),
   isFavourite: Joi.boolean(),
   contactType: Joi.string().valid('home', 'work','personal'),
 });

@@ -65,7 +65,7 @@ const updateContact = async (req, res, next) => {
     isFavourite,
     contactType,
   },
-  req.user.id
+  req.user._id
 );
 
     if (!updatedContact) return next(createError(404, 'Contact not found'));
@@ -105,14 +105,16 @@ const createContact = async (req, res, next) => {
 
 const deleteContact = async (req, res, next) => {
   try {
-    const { contactId } = req.params;
-    const deletedContact = await deleteContactFromService(contactId, req.user._id);
+    console.log("User ID from token:", req.user._id);
+    console.log("Deleting contact ID:", req.params.contactId);
 
-    if (!deletedContact) return next(createError(404, 'Contact not found'));
+    const deletedContact = await deleteContactFromService(req.params.contactId, req.user._id);
+
+    if (!deletedContact) return next(createError(404, "Contact not found"));
 
     res.status(204).send();
   } catch (error) {
-    console.error('Error in deleteContact:', error);
+    console.error("Error in deleteContact:", error);
     next(error);
   }
 };
