@@ -3,15 +3,16 @@ const createError = require("http-errors");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Session = require("../models/Session");
+const { registerSchema, loginSchema } = require("../models/authValidation");
 
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      throw createError(400, "All fields are required");
+    const { error } = registerSchema.validate(req.body);
+    if (error) {
+      throw createError(400, error.details[0].message);
     }
 
+    const { name, email, password } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw createError(409, "Email in use");
@@ -21,7 +22,6 @@ const registerUser = async (req, res, next) => {
     const newUser = await User.create({ name, email, password: hashedPassword });
 
     res.status(201).json({
-      status: "success",
       message: "Successfully registered a user!",
       data: { id: newUser._id, name: newUser.name, email: newUser.email },
     });
@@ -32,12 +32,12 @@ const registerUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      throw createError(400, "Email and password are required");
+    const { error } = loginSchema.validate(req.body);
+    if (error) {
+      throw createError(400, error.details[0].message);
     }
 
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
       throw createError(401, "Invalid email or password");
@@ -63,12 +63,10 @@ const loginUser = async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-    //   secure: process.env.NODE_ENV === "production",
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
-      status: "success",
       message: "Successfully logged in a user!",
       data: { accessToken },
     });
@@ -76,7 +74,6 @@ const loginUser = async (req, res, next) => {
     next(error);
   }
 };
-
 
 const refreshSession = async (req, res, next) => {
   try {
@@ -93,10 +90,8 @@ const refreshSession = async (req, res, next) => {
 
     const userId = session.userId;
 
-
     const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "15m" });
     const newRefreshToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
-
 
     session.accessToken = accessToken;
     session.refreshToken = newRefreshToken;
@@ -104,9 +99,7 @@ const refreshSession = async (req, res, next) => {
     session.refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     await session.save();
 
-
     res.status(200).json({
-      status: "success",
       message: "Successfully refreshed a session!",
       data: { accessToken },
     });
@@ -123,10 +116,8 @@ const logoutUser = async (req, res, next) => {
       throw createError(401, "No refresh token provided");
     }
 
-
     await Session.deleteMany({ refreshToken });
 
-    
     res.clearCookie("refreshToken");
 
     res.status(204).send();

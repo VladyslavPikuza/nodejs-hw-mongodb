@@ -19,7 +19,6 @@ const getContacts = async (req, res, next) => {
     const data = await getContactsData({ userId: req.user._id, ...req.query });
 
     res.status(200).json({
-      status: 200,
       message: 'Successfully found contacts!',
       data,
     });
@@ -36,7 +35,6 @@ const getContactById = async (req, res, next) => {
     if (!contact) return next(createError(404, 'Contact not found'));
 
     res.status(200).json({
-      status: 200,
       message: `Successfully found contact with id ${contactId}!`,
       data: contact,
     });
@@ -57,21 +55,20 @@ const updateContact = async (req, res, next) => {
     }
 
     const updatedContact = await updateContactInService(
-  contactId,
-  {
-    name,
-    phoneNumber,
-    email,
-    isFavourite,
-    contactType,
-  },
-  req.user._id
-);
+      contactId,
+      {
+        name,
+        phoneNumber,
+        email,
+        isFavourite,
+        contactType,
+      },
+      req.user._id
+    );
 
     if (!updatedContact) return next(createError(404, 'Contact not found'));
 
     res.status(200).json({
-      status: 200,
       message: 'Successfully patched a contact!',
       data: updatedContact,
     });
@@ -92,8 +89,8 @@ const createContact = async (req, res, next) => {
     }
 
     const newContact = await createContactInService({ ...req.body, userId: req.user._id });
+
     res.status(201).json({
-      status: 201,
       message: 'Successfully created a contact!',
       data: newContact,
     });

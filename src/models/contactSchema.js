@@ -3,7 +3,7 @@ const Joi = require('joi');
 const contactValidationSchema = Joi.object({
   name: Joi.string().min(3).required(),
   phoneNumber: Joi.string().required(),
-  email: Joi.string().email().required(),
+  email: Joi.string().email().optional(),
   isFavourite: Joi.boolean(),
   contactType: Joi.string().valid('home', 'work','personal').required(),
 });
