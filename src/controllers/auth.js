@@ -22,7 +22,7 @@ const registerUser = async (req, res, next) => {
     const newUser = await User.create({ name, email, password: hashedPassword });
 
     res.status(201).json({
-      message: "Successfully registered a user!",
+      status: 201,
       data: { id: newUser._id, name: newUser.name, email: newUser.email },
     });
   } catch (error) {
@@ -67,7 +67,7 @@ const loginUser = async (req, res, next) => {
     });
 
     res.status(200).json({
-      message: "Successfully logged in a user!",
+      status: 200,
       data: { accessToken },
     });
   } catch (error) {
@@ -100,7 +100,7 @@ const refreshSession = async (req, res, next) => {
     await session.save();
 
     res.status(200).json({
-      message: "Successfully refreshed a session!",
+      status: 200,
       data: { accessToken },
     });
   } catch (error) {
@@ -113,17 +113,35 @@ const logoutUser = async (req, res, next) => {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-      throw createError(401, "No refresh token provided");
+      throw createError(401, "Unauthorized: No refresh token provided");
     }
 
-    await Session.deleteMany({ refreshToken });
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    } catch (error) {
+      throw createError(401, "Unauthorized: Invalid refresh token");
+    }
 
-    res.clearCookie("refreshToken");
 
-    res.status(204).send();
+    await Session.deleteMany({ userId: decoded.userId });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+    });
+
+    res.status(204).json({ status: 204 });
   } catch (error) {
+    console.error("Logout error:", error);
     next(error);
   }
 };
 
+
+
+
+
 module.exports = { registerUser, loginUser, refreshSession, logoutUser };
+

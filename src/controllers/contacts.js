@@ -6,7 +6,6 @@ const {
   createContactInService,
 } = require('../services/contacts');
 const createError = require('http-errors');
-const { contactValidationSchema, updateContactValidationSchema } = require('../models/contactSchema');
 
 const getContacts = async (req, res, next) => {
   try {
@@ -19,7 +18,7 @@ const getContacts = async (req, res, next) => {
     const data = await getContactsData({ userId: req.user._id, ...req.query });
 
     res.status(200).json({
-      message: 'Successfully found contacts!',
+      status: 200,
       data,
     });
   } catch (error) {
@@ -35,7 +34,7 @@ const getContactById = async (req, res, next) => {
     if (!contact) return next(createError(404, 'Contact not found'));
 
     res.status(200).json({
-      message: `Successfully found contact with id ${contactId}!`,
+      status: 200,
       data: contact,
     });
   } catch (error) {
@@ -48,11 +47,6 @@ const updateContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const { name, phoneNumber, email, isFavourite, contactType } = req.body;
-
-    const { error } = updateContactValidationSchema.validate(req.body);
-    if (error) {
-      return next(createError(400, error.details[0].message));
-    }
 
     const updatedContact = await updateContactInService(
       contactId,
@@ -69,7 +63,7 @@ const updateContact = async (req, res, next) => {
     if (!updatedContact) return next(createError(404, 'Contact not found'));
 
     res.status(200).json({
-      message: 'Successfully patched a contact!',
+      status: 200,
       data: updatedContact,
     });
   } catch (error) {
@@ -82,16 +76,10 @@ const createContact = async (req, res, next) => {
   try {
     console.log('Request body for createContact:', req.body);
 
-    const { error } = contactValidationSchema.validate(req.body);
-    if (error) {
-      console.error('Validation error:', error.details);
-      return next(createError(400, error.details[0].message));
-    }
-
     const newContact = await createContactInService({ ...req.body, userId: req.user._id });
 
     res.status(201).json({
-      message: 'Successfully created a contact!',
+      status: 201,
       data: newContact,
     });
   } catch (error) {
@@ -109,7 +97,7 @@ const deleteContact = async (req, res, next) => {
 
     if (!deletedContact) return next(createError(404, "Contact not found"));
 
-    res.status(204).send();
+    res.status(204).json({ status: 204 });
   } catch (error) {
     console.error("Error in deleteContact:", error);
     next(error);

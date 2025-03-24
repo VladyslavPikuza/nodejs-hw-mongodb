@@ -21,9 +21,13 @@ const authenticate = async (req, res, next) => {
       return next(createError(401, "Unauthorized: Invalid token"));
     }
 
-    const session = await Session.findOne({ userId: decoded.userId, accessToken: token });
+    const session = await Session.findOne({ userId: decoded.userId });
     if (!session) {
       throw createError(401, "Unauthorized: Session not found");
+    }
+
+    if (session.accessToken !== token) {
+      throw createError(401, "Unauthorized: Invalid session");
     }
 
     req.user = { _id: decoded.userId };
