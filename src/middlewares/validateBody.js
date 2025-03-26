@@ -1,18 +1,15 @@
+const createError = require("http-errors");
+
 const validateBody = (schema) => {
   return (req, res, next) => {
-    if (!req.body) {
-      return res.status(400).json({ message: 'Request body is missing' });
-    }
-
     const { error } = schema.validate(req.body, { abortEarly: false });
 
     if (error) {
-      console.error('Validation error:', error.details);
-      return res.status(400).json({
-        status: 400,
-        message: 'Validation error',
-        details: error.details.map((detail) => detail.message),
-      });
+      const errorMessages = error.details.map((detail) => {
+        return `"${detail.context.label}" is required`;
+      }).join(", ");
+      
+      return next(createError(400, errorMessages));
     }
 
     next();
@@ -20,6 +17,5 @@ const validateBody = (schema) => {
 };
 
 module.exports = validateBody;
-
 
 
