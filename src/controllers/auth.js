@@ -70,27 +70,52 @@ const loginUser = async (req, res) => {
 };
 
 const refreshSession = async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+  const { refreshToken } = req.cookies;
 
   if (!refreshToken) {
     throw createError(401, "No refresh token provided");
   }
 
+  
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+  } catch (error) {
+    throw createError(403, "Refresh token expired or invalid");
+  }
+
   const session = await Session.findOne({ refreshToken });
+
   if (!session) {
     throw createError(401, "Invalid refresh token");
   }
 
+
+  if (session.refreshTokenValidUntil < new Date()) {
+    await Session.deleteOne({ _id: session._id });
+    throw createError(403, "Refresh token expired. Please log in again.");
+  }
+
   const userId = session.userId;
+
 
   const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "15m" });
   const newRefreshToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
+
 
   session.accessToken = accessToken;
   session.refreshToken = newRefreshToken;
   session.accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000);
   session.refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   await session.save();
+
+
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  });
 
   res.status(200).json({
     status: 200,

@@ -1,20 +1,13 @@
-import { HttpError } from 'http-errors';
-
 export const errorHandler = (err, req, res, next) => {
-  if (err instanceof HttpError) {
-    const errorMessage = "Validation error";
+  let errorMessage = err.name;
 
-    return res.status(err.status).json({
-      status: err.status,
-      message: errorMessage,
-      data: { message: err.message },
-    });
+  if (err.status === 400) {
+    errorMessage = "Validation error";
   }
 
-
-  res.status(500).json({
-    status: 500,
-    message: 'Something went wrong',
-    data: err.message,
+  res.status(err.status || 500).json({
+    status: err.status || 500,
+    message: errorMessage,
+    data: { message: err.message },
   });
 };
