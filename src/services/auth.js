@@ -3,6 +3,9 @@ const bcrypt = require("bcrypt");
 const createError = require("http-errors");
 const User = require("../models/user");
 const Session = require("../models/Session");
+const sendEmail = require("../utils/sendMail");
+const { getEnvVar } = require("../utils/getEnvVar");
+
 
 const registerUserService = async (name, email, password) => {
   const existingUser = await User.findOne({ email });
@@ -11,7 +14,7 @@ const registerUserService = async (name, email, password) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  return await User.create({ name, email, password: hashedPassword });
+  return User.create({ name, email, password: hashedPassword });
 };
 
 const loginUserService = async (email, password) => {
@@ -36,4 +39,26 @@ const loginUserService = async (email, password) => {
   return { accessToken, refreshToken };
 };
 
-module.exports = { registerUserService, loginUserService };
+const requestResetToken = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw createError(404, "User not found");
+  }
+
+  const resetToken = jwt.sign(
+    { sub: user._id, email },
+    getEnvVar("JWT_SECRET"),
+    { expiresIn: "5m" }
+  );
+
+  const resetLink = `${getEnvVar("APP_DOMAIN")}/reset-password?token=${resetToken}`;
+
+  await sendEmail({
+    from: getEnvVar("SMTP_FROM"),
+    to: email,
+    subject: "Reset your password",
+    html: `<p>Click <a href="${resetLink}">here</a> to reset your password!</p>`,
+  });
+};
+
+module.exports = { registerUserService, loginUserService, requestResetToken };

@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Session = require("../models/Session");
 const { registerSchema, loginSchema } = require("../models/authValidation");
+const { requestResetToken } = require("../services/auth");
 
 const registerUser = async (req, res) => {
   const { error } = registerSchema.validate(req.body);
@@ -76,7 +77,7 @@ const refreshSession = async (req, res) => {
     throw createError(401, "No refresh token provided");
   }
 
-  
+
   let decoded;
   try {
     decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
@@ -152,6 +153,15 @@ const logoutUser = async (req, res) => {
   });
 };
 
-module.exports = { registerUser, loginUser, refreshSession, logoutUser };
+const requestResetEmailController = async (req, res) => {
+  await requestResetToken(req.body.email);
+  res.json({
+    status: 200,
+    message: "Reset password email has been successfully sent.",
+    data: {},
+  });
+};
+
+module.exports = { registerUser, loginUser, refreshSession, logoutUser, requestResetEmailController };
 
 

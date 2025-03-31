@@ -35,4 +35,8 @@ const loginSchema = Joi.object({
   }),
 });
 
-module.exports = { registerSchema, loginSchema };
+const requestResetEmailSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+module.exports = { registerSchema, loginSchema, requestResetEmailSchema };
