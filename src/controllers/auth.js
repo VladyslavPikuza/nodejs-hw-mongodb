@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Session = require("../models/Session");
 const { registerSchema, loginSchema } = require("../models/authValidation");
-const { requestResetToken } = require("../services/auth");
+const { requestResetToken, resetPasswordService } = require("../services/auth");
 
 const registerUser = async (req, res) => {
   const { error } = registerSchema.validate(req.body);
@@ -162,6 +162,21 @@ const requestResetEmailController = async (req, res) => {
   });
 };
 
-module.exports = { registerUser, loginUser, refreshSession, logoutUser, requestResetEmailController };
+const resetPasswordController = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    await resetPasswordService(token, password);
+
+    res.json({
+      status: 200,
+      message: "Password has been successfully reset.",
+      data: {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, refreshSession, logoutUser, requestResetEmailController, resetPasswordController };
 
 

@@ -6,6 +6,7 @@ const {
   createContactInService,
 } = require("../services/contacts");
 const createError = require("http-errors");
+const cloudinary = require("../utils/cloudinary");
 
 const getContacts = async (req, res) => {
   if (!req.user?._id) {
@@ -35,15 +36,18 @@ const getContactById = async (req, res) => {
 
 const updateContact = async (req, res) => {
   const { contactId } = req.params;
-  const { name, phoneNumber, email, isFavourite, contactType } = req.body;
+  let updatedData = { ...req.body };
 
-  const updatedContact = await updateContactInService(
-    contactId,
-    { name, phoneNumber, email, isFavourite, contactType },
-    req.user._id
-  );
+  if (req.file) {
+    const uploadResult = await cloudinary.uploader.upload(req.file.path, { folder: "contacts" });
+    updatedData.photo = uploadResult.secure_url;
+  }
 
-  if (!updatedContact) throw createError(404, "Contact not found");
+  const updatedContact = await updateContactInService(contactId, updatedData, req.user._id);
+
+  if (!updatedContact) {
+    return res.status(404).json({ message: "Contact not found" });
+  }
 
   res.status(200).json({
     status: 200,
@@ -52,14 +56,33 @@ const updateContact = async (req, res) => {
   });
 };
 
-const createContact = async (req, res) => {
-  const newContact = await createContactInService({ ...req.body, userId: req.user._id });
+const cleanString = (str) => str.replace(/[\t\r\n]/g, '').trim();
 
-  res.status(201).json({
-    status: 201,
-    message: "Contact created successfully",
-    data: newContact,
-  });
+const createContact = async (req, res, next) => {
+  try {
+    const cleanedData = {
+      name: cleanString(req.body.name),
+      phoneNumber: cleanString(req.body.phoneNumber),
+      email: req.body.email ? req.body.email.trim() : "",
+      isFavourite: req.body.isFavourite,
+      contactType: req.body.contactType,
+    };
+
+    let photoUrl = "";
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, { folder: "contacts" });
+      photoUrl = uploadResult.secure_url;
+    }
+
+    const newContact = await createContactInService({ ...cleanedData, userId: req.user._id, photo: photoUrl });
+    res.status(201).json({
+      status: 201,
+      message: "Contact created successfully",
+      data: newContact,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 const deleteContact = async (req, res) => {
@@ -70,4 +93,5 @@ const deleteContact = async (req, res) => {
   res.status(204).send();
 };
 
-module.exports = { getContacts, getContactById, updateContact, deleteContact, createContact };
+
+module.exports = { getContacts, getContactById, updateContact, deleteContact, createContact,};

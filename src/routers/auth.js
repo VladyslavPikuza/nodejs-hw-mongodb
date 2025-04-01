@@ -1,8 +1,8 @@
 const express = require("express");
 const ctrlWrapper = require("../utils/ctrlWrapper");
 const validateBody = require("../middlewares/validateBody");
-const { registerSchema, loginSchema, requestResetEmailSchema } = require("../models/authValidation");
-const { registerUser, loginUser, refreshSession, logoutUser, requestResetEmailController } = require("../controllers/auth");
+const { registerSchema, loginSchema, requestResetEmailSchema, resetPasswordSchema } = require("../models/authValidation");
+const { registerUser, loginUser, refreshSession, logoutUser, requestResetEmailController, resetPasswordController } = require("../controllers/auth");
 
 const router = express.Router();
 
@@ -15,5 +15,6 @@ router.post(
   validateBody(requestResetEmailSchema),
   ctrlWrapper(requestResetEmailController),
 );
+router.post("/reset-pwd", validateBody(resetPasswordSchema), resetPasswordController);
 
 module.exports = router;

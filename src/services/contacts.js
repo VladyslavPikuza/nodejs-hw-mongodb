@@ -80,7 +80,7 @@ const updateContactInService = async (contactId, updateData, userId) => {
 
 const deleteContactFromService = async (contactId, userId) => {
   try {
-    const deletedContact = await Contact.findOneAndDelete({ _id: contactId, userId }).lean(); 
+    const deletedContact = await Contact.findOneAndDelete({ _id: contactId, userId }).lean();
 
     return deletedContact;
   } catch (error) {

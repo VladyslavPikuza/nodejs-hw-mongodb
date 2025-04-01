@@ -61,4 +61,19 @@ const requestResetToken = async (email) => {
   });
 };
 
-module.exports = { registerUserService, loginUserService, requestResetToken };
+const resetPasswordService = async (token, newPassword) => {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  const user = await User.findOne({ email: decoded.email });
+  if (!user) {
+    throw createError(404, "User not found!");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await User.findByIdAndUpdate(user._id, { password: hashedPassword }, { new: true });
+
+};
+
+
+module.exports = { registerUserService, loginUserService, requestResetToken, resetPasswordService };
