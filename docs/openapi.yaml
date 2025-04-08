@@ -13,7 +13,7 @@ tags:
     description: Auth operations.
 servers:
   - url: http://localhost:4000
-  - url: https://nodejs-hw-mongodb-1-7-hometask.onrender.com
+  - url: https://hw7-swagger-6028.onrender.com
 paths:
   /contacts:
     get:
