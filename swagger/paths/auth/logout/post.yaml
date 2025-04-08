@@ -1,0 +1,19 @@
+tags:
+  - Auth
+summary: User logout
+operationId: logoutUser
+description: Logs out the user by clearing authentication cookies
+security: []
+parameters:
+  - in: cookie
+    name: sessionId
+    schema:
+      type: string
+      example: 'abc123xyz'
+    required: true
+    description: The session ID stored in cookies.
+responses:
+  '204':
+    description: Successfully logged out. No content returned.
+  '401':
+    $ref: ../../../components/responses/401.yaml

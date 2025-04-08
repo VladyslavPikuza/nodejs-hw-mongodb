@@ -1,0 +1,63 @@
+tags:
+  - Auth
+summary: User register
+operationId: registerUser
+description: Rgister user
+security: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - name
+          - email
+          - password
+        properties:
+          name:
+            type: string
+            example: 'Ivan Franko'
+          email:
+            type: string
+            format: email
+            example: 'user@example.com'
+          password:
+            type: string
+            format: password
+            example: 'P@ssw0rd!'
+responses:
+  '201':
+    description: Successfully registered a user!
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 201
+            message:
+              type: string
+              example: 'User is successfully registered'
+            data:
+              type: object
+              required:
+                - name
+                - email
+              properties:
+                name:
+                  type: string
+                  example: 'Ivan Franko'
+                email:
+                  type: string
+                  format: email
+                  example: 'user@example.com'
+  '409':
+    $ref: ../../../components/responses/409.yaml
+  '500':
+    $ref: ../../../components/responses/500.yaml

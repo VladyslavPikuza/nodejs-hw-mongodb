@@ -1,98 +1,79 @@
-const { Contact } = require('../models/contacts');
+import { SORT_ORDER } from '../constants/enum/sort.js';
+import { ContactsCollection } from '../db/models/contact.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
-const getAllContacts = async (userId, filter = {}, page = 1, perPage = 10, sortBy = "createdAt", sortOrder = "asc") => {
-  try {
-    console.log("User ID:", userId);
+export const getAllContacts = async ({
+  userId,
+  page,
+  perPage,
+  sortOrder = SORT_ORDER.ASC,
+  sortBy = '_id',
+  filter = {},
+}) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
 
-    if (!userId) {
-      throw new Error("User ID is required");
-    }
+  const contactsQuery = ContactsCollection.find({ userId });
 
-    const skip = (Number(page) - 1) * Number(perPage);
-    filter.userId = userId;
+  if (filter.contactType) {
+    contactsQuery.where('contactType').equals(filter.contactType);
+  }
 
-    const contacts = await Contact.find(filter)
-      .sort({ [sortBy]: sortOrder === "desc" ? -1 : 1 })
+  if (filter.isFavourite !== undefined) {
+    contactsQuery.where('isFavourite').equals(filter.isFavourite);
+  }
+
+  const [contacts, contactsCount] = await Promise.all([
+    ContactsCollection.find()
+      .merge(contactsQuery)
       .skip(skip)
-      .limit(Number(perPage))
-      .lean();
+      .limit(limit)
+      .sort({
+        [sortBy]: sortOrder,
+      })
+      .exec(),
+    ContactsCollection.find().merge(contactsQuery).countDocuments(),
+  ]);
 
-    contacts.forEach(contact => delete contact.userId);
+  const paginationData = calculatePaginationData(contactsCount, perPage, page);
 
-    const totalItems = await Contact.countDocuments(filter);
-
-    return { contacts, totalItems };
-  } catch (error) {
-    console.error("Error fetching contacts:", error);
-    throw new Error("Error fetching contacts: " + error.message);
-  }
+  return {
+    data: contacts,
+    ...paginationData,
+  };
 };
 
-const getContactByIdFromService = async (contactId, userId) => {
-  try {
-    const contact = await Contact.findOne({ _id: contactId, userId }).lean();
-    if (!contact) return null;
-
-    delete contact.userId;
-
-    return contact;
-  } catch (error) {
-    console.error(error);
-    throw new Error('Error fetching contact: ' + error.message);
-  }
+export const getContactById = (contactId, userId) => {
+  return ContactsCollection.findOne({ _id: contactId, userId });
 };
 
-const createContactInService = async (contactData) => {
-  try {
-    console.log("Creating contact for user:", contactData.userId);
-
-    const newContact = new Contact(contactData);
-    await newContact.save();
-
-    const contactResponse = newContact.toObject();
-    delete contactResponse.userId;
-
-    return contactResponse;
-  } catch (error) {
-    console.error("Error saving contact:", error);
-    throw error;
-  }
+export const createContact = async (payload) => {
+  return await ContactsCollection.create(payload);
 };
 
-const updateContactInService = async (contactId, updateData, userId) => {
-  try {
-    const updatedContact = await Contact.findOneAndUpdate(
-      { _id: contactId, userId },
-      updateData,
-      { new: true }
-    ).lean();
+export const deleteContact = (contactId, userId) =>
+  ContactsCollection.findOneAndDelete({ _id: contactId, userId });
 
-    if (!updatedContact) return null;
+export const updateContact = async (
+  contactId,
+  userId,
+  payload,
+  options = {},
+) => {
+  const rawResult = await ContactsCollection.findOneAndUpdate(
+    { _id: contactId, userId },
+    payload,
+    {
+      new: true,
+      includeResultMetadata: true,
+      ...options,
+    },
+  );
 
-    delete updatedContact.userId;
+  if (!rawResult || !rawResult.value) return null;
 
-    return updatedContact;
-  } catch (error) {
-    console.error("Error updating contact:", error);
-    throw new Error("Error updating contact: " + error.message);
-  }
-};
-
-const deleteContactFromService = async (contactId, userId) => {
-  try {
-    const deletedContact = await Contact.findOneAndDelete({ _id: contactId, userId }).lean();
-
-    return deletedContact;
-  } catch (error) {
-    console.error('Error deleting contact:', error);
-    throw new Error('Error deleting contact: ' + error.message);
-  }
-};
-
-module.exports = {
-  getAllContacts,
-  getContactByIdFromService,
-  createContactInService,
-  updateContactInService,
-  deleteContactFromService
+  return {
+    contact: rawResult.value,
+    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
+  };
 };

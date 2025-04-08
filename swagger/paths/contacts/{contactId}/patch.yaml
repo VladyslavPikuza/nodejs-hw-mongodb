@@ -1,0 +1,77 @@
+tags:
+  - Contacts
+summary: Update contact
+operationId: updateContact
+description: Update contact by id
+security:
+  - bearerAuth: []
+parameters:
+  - in: path
+    name: contactId
+    required: true
+    schema:
+      type: string
+      example: '65ca67e7ae7f10c88b598384'
+requestBody:
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name:
+            description: "Contact's name"
+            type: [string, 'null']
+            default: ''
+            example: 'Ivan Franko'
+          phoneNumber:
+            description: "Contact's phoneNumber"
+            type: [string, 'null']
+            default: ''
+            example: '+380927842456'
+          email:
+            description: "Contact's email"
+            type: [string, 'null']
+            default: ''
+            example: 'frankoivan@gmail.com'
+          contactType:
+            description: "Contact's type"
+            type: [string, 'null']
+            enum: ['work', 'home', 'personal']
+            default: personal
+          isFavourite:
+            description: 'Indicates whether the contact is marked as a favourite'
+            type: [boolean, 'null']
+            example: false
+          photo:
+            description: "Contact's photo"
+            type: string
+            format: binary
+responses:
+  '200':
+    description: Update contact by id
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: Successfully update contact with id 65ca67e7ae7f10c88b598384!
+            data:
+              type: object
+              $ref: ../../../components/schemas/contact.yaml
+  '400':
+    $ref: ../../../components/responses/400.yaml
+  '401':
+    $ref: ../../../components/responses/401.yaml
+  '404':
+    $ref: ../../../components/responses/404.yaml
+  '500':
+    $ref: ../../../components/responses/500.yaml
