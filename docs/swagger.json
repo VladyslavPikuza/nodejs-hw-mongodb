@@ -171,14 +171,8 @@
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
           "401": {
             "$ref": "#/components/responses/401"
-          },
-          "404": {
-            "$ref": "#/components/responses/404"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -284,9 +278,6 @@
           },
           "401": {
             "$ref": "#/components/responses/401"
-          },
-          "409": {
-            "$ref": "#/components/responses/409"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -432,8 +423,7 @@
                   "name": {
                     "description": "Contact's name",
                     "type": [
-                      "string",
-                      "null"
+                      "string"
                     ],
                     "default": "",
                     "example": "Ivan Franko"
@@ -441,8 +431,7 @@
                   "phoneNumber": {
                     "description": "Contact's phoneNumber",
                     "type": [
-                      "string",
-                      "null"
+                      "string"
                     ],
                     "default": "",
                     "example": "+380927842456"
@@ -450,8 +439,7 @@
                   "email": {
                     "description": "Contact's email",
                     "type": [
-                      "string",
-                      "null"
+                      "string"
                     ],
                     "default": "",
                     "example": "frankoivan@gmail.com"
@@ -459,8 +447,7 @@
                   "contactType": {
                     "description": "Contact's type",
                     "type": [
-                      "string",
-                      "null"
+                      "string"
                     ],
                     "enum": [
                       "work",
@@ -472,8 +459,7 @@
                   "isFavourite": {
                     "description": "Indicates whether the contact is marked as a favourite",
                     "type": [
-                      "boolean",
-                      "null"
+                      "boolean"
                     ],
                     "example": false
                   },
@@ -988,7 +974,8 @@
           "_id",
           "name",
           "phoneNumber",
-          "contactType"
+          "contactType",
+          "userId"
         ],
         "properties": {
           "_id": {
@@ -1026,8 +1013,8 @@
             ],
             "default": "personal"
           },
-          "parentId": {
-            "description": "Contact's parent id",
+          "userId": {
+            "description": "User ID who owns this contact",
             "type": "string",
             "example": "65ca67e7ae7f10c88b598384"
           },

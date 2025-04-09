@@ -20,27 +20,27 @@ requestBody:
         properties:
           name:
             description: "Contact's name"
-            type: [string, 'null']
+            type: [string]
             default: ''
             example: 'Ivan Franko'
           phoneNumber:
             description: "Contact's phoneNumber"
-            type: [string, 'null']
+            type: [string]
             default: ''
             example: '+380927842456'
           email:
             description: "Contact's email"
-            type: [string, 'null']
+            type: [string]
             default: ''
             example: 'frankoivan@gmail.com'
           contactType:
             description: "Contact's type"
-            type: [string, 'null']
+            type: [string]
             enum: ['work', 'home', 'personal']
             default: personal
           isFavourite:
             description: 'Indicates whether the contact is marked as a favourite'
-            type: [boolean, 'null']
+            type: [boolean]
             example: false
           photo:
             description: "Contact's photo"

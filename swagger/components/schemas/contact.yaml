@@ -4,6 +4,7 @@ required:
   - name
   - phoneNumber
   - contactType
+  - userId
 properties:
   _id:
     description: "Contact's id"
@@ -30,8 +31,8 @@ properties:
     type: string
     enum: ['work', 'home', 'personal']
     default: personal
-  parentId:
-    description: "Contact's parent id"
+  userId:
+    description: 'User ID who owns this contact'
     type: string
     example: 65ca67e7ae7f10c88b598384
   photo:
